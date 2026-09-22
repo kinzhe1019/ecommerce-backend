@@ -1,19 +1,19 @@
-#E-commerce Full Stack - Backend
+# E-commerce Full Stack - Backend
 
 Proyecto de tienda online del módulo Desenvolupament d'aplicacions amb Frameworks clients/ervidor(curs 2026-2027).
 Este repositorio contiene el backend.
 
-##Tecnologías
+## Tecnologías
 
 - React
 - Node.js / Express
 - MongoDB
 - Docker
 
-##Autor
+## Autor
 Xinkai Zheng
 
-##Cómo ejecutar el proyecto
+## Cómo ejecutar el proyecto
 
 1. Clonar el repositorio: git clone https://github.com/kinzhe1019/ecommerce-backend.git
 2. Entrar en la carpeta: cd ecommerce-backend
