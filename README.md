@@ -11,11 +11,14 @@ Este repositorio contiene el backend.
 - Docker
 
 ## Autor
+
 Xinkai Zheng
 
 ## Cómo ejecutar el proyecto
 
 1. Clonar el repositorio: git clone https://github.com/kinzhe1019/ecommerce-backend.git
-2. Entrar en la carpeta: cd ecommerce-backend
-3. Instalar dependencias: npm install
-4. Arrancar el proyecto: npm start
+2. Arrancar MongoDB con Docker: docker compose up -d (en la carpeta del docker-compose)
+3. Entrar en la carpeta de la API: cd ecommerce-backend/api
+4. Instalar dependencias: npm install
+5. Crear el fichero .env con PORT y MONGO_URI
+6. Arrancar en modo desarrollo: npm run dev
