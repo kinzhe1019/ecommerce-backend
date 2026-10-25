@@ -1,3 +1,8 @@
+# Archivos y carpetas que Git NO sube a GitHub
+
+# Las librerías: pesan mucho y se recuperan con npm install
 node_modules/
+# Carpeta de archivos compilados (ahora no la usamos)
 dist/
+# Variables secretas, como la contraseña de MongoDB
 .env
