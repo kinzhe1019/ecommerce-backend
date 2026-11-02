@@ -6,7 +6,13 @@ const router = express.Router();
 const userController = require("../controllers/userController");
 
 // Todas estas rutas empiezan por /api/users (se monta en index.js)
-// ATENCIÓN: hasta que pongamos JWT y roles, solo en local y con datos inventados
+// ATENCIÓN: register y login ya funcionan con JWT, pero el CRUD todavía no
+// está protegido con el token (eso vendrá más adelante): solo en local
+
+// POST /api/users/register → registro (cualquiera puede registrarse)
+router.post("/register", userController.register);
+// POST /api/users/login → login (devuelve el token JWT)
+router.post("/login", userController.login);
 
 // GET /api/users → lista los usuarios
 router.get("/", userController.getAllUsers);

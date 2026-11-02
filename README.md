@@ -8,6 +8,7 @@ Este repositorio contiene el backend: una API REST con Express y MongoDB.
 - Node.js / Express
 - MongoDB + Mongoose
 - bcrypt (hash de contraseñas)
+- jsonwebtoken (tokens JWT para el login)
 - Docker
 - Postman
 
@@ -21,7 +22,7 @@ Xinkai Zheng
 2. Tener MongoDB funcionando en `localhost:27017` (yo uso Docker con la imagen `mongo:8`; el `docker-compose.yml` no está en este repositorio)
 3. Entrar en la carpeta de la API: `cd ecommerce-backend/api`
 4. Instalar dependencias: `npm install`
-5. Copiar `.env.example` a `.env` y poner tu usuario y contraseña de MongoDB
+5. Copiar `.env.ejemploParaQueSepasComoHacer` a `.env` y poner tu usuario y contraseña de MongoDB y una clave larga en `JWT_SECRET`
 6. Arrancar en modo desarrollo: `npm run dev`
 7. La API funciona en `http://localhost:3000`
 
@@ -32,6 +33,7 @@ Xinkai Zheng
 | Productos  | `GET/POST /api/products`, `GET/PUT/DELETE /api/products/:id`                                         |
 | Categorías | `GET/POST /api/categories`, `GET/PUT/DELETE /api/categories/:id`                                     |
 | Usuarios   | `GET/POST /api/users`, `GET/PUT /api/users/:id`, `DELETE /api/users/:id` (desactiva: `active=false`) |
+| Auth       | `POST /api/users/register` (registro, devuelve token), `POST /api/users/login` (login, devuelve token) |
 
 Filtros en `GET /api/categories` y `GET /api/users`: `?active=true`, `?name=texto`, `?sort=name` (o `-name`, `createdAt`, `-createdAt`; en usuarios también `email` y `-email`),`?page=1&limit=10` (máximo 50).
 
@@ -41,8 +43,8 @@ Filtros en `GET /api/categories` y `GET /api/users`: `?active=true`, `?name=text
    - `ecommerce.postman_collection.json` (colección "Ecommerce API")
    - `ecommerce-local.postman_environment.json` (entorno "Ecommerce Local")
 2. Arriba a la derecha, seleccionar el entorno **Ecommerce Local** (`baseUrl = http://localhost:3000`).
-3. Con la API arrancada, ejecutar las peticiones de las carpetas Products, Categories y Users, o toda la colección con **Run collection**.
+3. Con la API arrancada, ejecutar las peticiones de las carpetas Products, Categories, Users y Auth, o toda la colección con **Run collection**.
 
 ## Aviso
 
-Los endpoints de usuarios todavía no tienen JWT ni roles: solo se usan en local y con datos inventados. No se tienen que desplegar públicamente.
+El registro y el login ya funcionan con bcrypt y JWT, pero las rutas del CRUD todavía no comprueban el token ni el rol: solo se usan en local y con datos inventados. No se tienen que desplegar públicamente.
