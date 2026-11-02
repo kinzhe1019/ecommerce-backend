@@ -78,11 +78,38 @@ const deactivateUser = async (req, res, next) => {
   }
 };
 
-// Exportamos las 5 funciones para usarlas en las rutas
+// POST /api/users/register → registrarse (crea el usuario y devuelve un token)
+const register = async (req, res, next) => {
+  try {
+    const result = await userService.registerUser(req.body);
+    // 201 = Created. En data van el usuario y el token
+    res.status(201).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/users/login → iniciar sesión (devuelve un token)
+const login = async (req, res, next) => {
+  try {
+    const result = await userService.loginUser(
+      req.body.email,
+      req.body.password,
+    );
+    // 200 = OK. En data van el usuario y el token
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Exportamos las 7 funciones para usarlas en las rutas
 module.exports = {
   createUser,
   getAllUsers,
   getUserById,
   updateUser,
   deactivateUser,
+  register,
+  login,
 };

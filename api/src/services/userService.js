@@ -3,6 +3,8 @@
 
 // bcrypt convierte la contraseña en un hash (un texto que no se puede "deshacer")
 const bcrypt = require("bcrypt");
+// jsonwebtoken crea los tokens JWT (el "pase" que recibe el usuario al hacer login)
+const jwt = require("jsonwebtoken");
 // Importamos el modelo User
 const User = require("../models/User");
 
@@ -170,6 +172,61 @@ const deactivateUser = async (id) => {
   );
 };
 
+// Crea un token JWT para un usuario.
+// Dentro guardamos su id y su rol, y lo firmamos con la clave secreta del .env
+const generateToken = (user) => {
+  return jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }, // el token caduca en 1 hora
+  );
+};
+
+// REGISTRO: crea el usuario y le da un token
+const registerUser = async (userData) => {
+  // 1. Usamos createUser, que ya comprueba la contraseña,
+  // hace el hash con bcrypt y pone role "client"
+  const user = await createUser(userData);
+  // 2. Creamos el token del usuario nuevo
+  const token = generateToken(user);
+  // 3. Devolvemos los dos
+  return { user: user, token: token };
+};
+
+// LOGIN: comprueba el email y la contraseña y, si están bien, da un token
+const loginUser = async (email, password) => {
+  // 1. Tienen que llegar el email y la contraseña, y ser texto
+  if (typeof email !== "string" || typeof password !== "string") {
+    const error = new Error("Cal enviar l'email i la contrasenya");
+    error.status = 422;
+    error.code = "VALIDATION_ERROR";
+    throw error;
+  }
+  // 2. Buscamos el usuario por su email.
+  // Con select("+passwordHash") pedimos también el hash, que normalmente
+  // no viene porque en el modelo tiene select: false
+  const user = await User.findOne({ email: email.toLowerCase() }).select(
+    "+passwordHash",
+  );
+  // 3. Si existe y está activo, bcrypt compara la contraseña con el hash
+  let correct = false;
+  if (user && user.active) {
+    correct = await bcrypt.compare(password, user.passwordHash);
+  }
+  // 4. Si no existe, está desactivado o la contraseña está mal → 401.
+  // El mensaje es el mismo en los 3 casos, así no damos pistas
+  if (!correct) {
+    const error = new Error("Email o contrasenya incorrectes");
+    error.status = 401;
+    error.code = "INVALID_CREDENTIALS";
+    throw error;
+  }
+  // 5. Todo bien: creamos el token y quitamos el hash antes de devolver el usuario
+  const token = generateToken(user);
+  user.passwordHash = undefined;
+  return { user: user, token: token };
+};
+
 // Exportamos las funciones para usarlas en el controlador
 module.exports = {
   createUser,
@@ -177,4 +234,6 @@ module.exports = {
   getUserById,
   updateUser,
   deactivateUser,
+  registerUser,
+  loginUser,
 };
