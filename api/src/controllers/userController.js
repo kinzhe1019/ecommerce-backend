@@ -5,6 +5,8 @@
 
 // Importamos el servicio de usuarios
 const userService = require("../services/userService");
+// Importamos el servicio de tokens (renovar y cerrar sesión)
+const tokenService = require("../services/tokenService");
 
 // POST /api/users → crear un usuario
 const createUser = async (req, res, next) => {
@@ -86,18 +88,18 @@ const deactivateUser = async (req, res, next) => {
   }
 };
 
-// POST /api/users/register → registrarse (crea el usuario y devuelve un token)
+// POST /api/users/register → registrarse (crea el usuario y devuelve los tokens)
 const register = async (req, res, next) => {
   try {
     const result = await userService.registerUser(req.body);
-    // 201 = Created. En data van el usuario y el token
+    // 201 = Created. En data van el usuario, el accessToken y el refreshToken
     res.status(201).json({ success: true, data: result });
   } catch (error) {
     next(error);
   }
 };
 
-// POST /api/users/login → iniciar sesión (devuelve un token)
+// POST /api/users/login → iniciar sesión (devuelve los tokens)
 const login = async (req, res, next) => {
   try {
     // Le pasamos al servicio el email y la contraseña que llegan en el body
@@ -105,14 +107,54 @@ const login = async (req, res, next) => {
       req.body.email,
       req.body.password,
     );
-    // 200 = OK. En data van el usuario y el token
+    // 200 = OK. En data van el usuario, el accessToken y el refreshToken
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     next(error);
   }
 };
 
-// Exportamos las 7 funciones para usarlas en las rutas
+// POST /api/users/refresh → renovar los tokens (rotación)
+const refresh = async (req, res, next) => {
+  try {
+    // En el body llega el refresh token: { "refreshToken": "..." }
+    const tokens = await tokenService.refreshTokens(req.body.refreshToken);
+    // 200 = OK. En data van el accessToken y el refreshToken NUEVOS
+    res.status(200).json({ success: true, data: tokens });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/users/logout → cerrar sesión (anula el refresh token)
+const logout = async (req, res, next) => {
+  try {
+    await tokenService.revokeRefreshToken(req.body.refreshToken);
+    res.status(200).json({ success: true, message: "Sessió tancada" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// GET /api/users/me → RUTA PROTEGIDA: devuelve el usuario que ha hecho login.
+// Antes pasa por el middleware protect, que deja el id del token en req.user
+const getMe = async (req, res, next) => {
+  try {
+    const user = await userService.getUserById(req.user.id);
+    // null = el usuario del token ya no existe → error 404
+    if (!user) {
+      const error = new Error("Usuari no trobat");
+      error.status = 404;
+      error.code = "NOT_FOUND";
+      return next(error);
+    }
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Exportamos las 10 funciones para usarlas en las rutas
 module.exports = {
   createUser,
   getAllUsers,
@@ -121,4 +163,7 @@ module.exports = {
   deactivateUser,
   register,
   login,
+  refresh,
+  logout,
+  getMe,
 };
