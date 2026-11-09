@@ -37,5 +37,6 @@ const productSchema = new mongoose.Schema({
 // Índice para buscar rápido los productos de una categoría (1 = orden ascendente)
 productSchema.index({ category: 1 });
 
-// Creamos el modelo "Product" a partir del esquema y lo exportamos
+// Creamos el modelo "Product" a partir del esquema y lo exportamos.
+// En MongoDB se guarda en la colección "products"
 module.exports = mongoose.model("Product", productSchema);

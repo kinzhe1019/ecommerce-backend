@@ -19,8 +19,8 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: [true, "L'slug és obligatori"],
       unique: true,
-      lowercase: true,
-      trim: true,
+      lowercase: true, // lo guarda en minúsculas
+      trim: true, // quita los espacios de delante y de detrás
     },
     // Descripción: opcional, como máximo 500 caracteres
     description: {
@@ -34,5 +34,6 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-// Creamos el modelo "Category" a partir del esquema y lo exportamos
+// Creamos el modelo "Category" a partir del esquema y lo exportamos.
+// En MongoDB se guarda en la colección "categories"
 module.exports = mongoose.model("Category", categorySchema);

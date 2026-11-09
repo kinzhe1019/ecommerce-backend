@@ -1,6 +1,8 @@
 // El controlador se encarga de la parte HTTP: recibe la petición (req),
 // llama al servicio y responde (res) con un código de estado y un JSON.
-// Si hay un error, NO responde aquí: lo pasa con next(error) al errorHandler
+// Si hay un error, NO responde aquí: lo pasa con next(error) al errorHandler.
+// async/await: esperamos (await) a que el servicio termine con la base de datos.
+// try/catch: si algo falla dentro del try, salta al catch
 
 // Importamos el servicio, que es el que trabaja con la base de datos
 const productService = require("../services/productService");
@@ -13,6 +15,7 @@ const createProduct = async (req, res, next) => {
     // 201 = Created (creado). Devolvemos el producto, que ya tiene su _id
     res.status(201).json({ success: true, data: product });
   } catch (error) {
+    // Si algo falla (ej: falta el name), el error va al errorHandler
     next(error);
   }
 };
@@ -53,6 +56,7 @@ const updateProduct = async (req, res, next) => {
   try {
     // Le pasamos al servicio el id de la URL y los datos nuevos del body
     const product = await productService.updateProduct(req.params.id, req.body);
+    // null = no existe ese producto → error 404
     if (!product) {
       const error = new Error("Producte no trobat");
       error.status = 404;
@@ -70,6 +74,7 @@ const updateProduct = async (req, res, next) => {
 const deleteProduct = async (req, res, next) => {
   try {
     const product = await productService.deleteProduct(req.params.id);
+    // null = no existe ese producto → error 404
     if (!product) {
       const error = new Error("Producte no trobat");
       error.status = 404;
