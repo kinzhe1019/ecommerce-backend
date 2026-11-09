@@ -51,13 +51,15 @@ const createUser = async (userData) => {
 
 // Listar usuarios con filtros, ordenación y paginación (igual que en categorías)
 const getAllUsers = async (query) => {
-  // 1. FILTROS
+  // 1. FILTROS: ?active=true o ?active=false (en la URL todo llega como texto)
   const filter = {};
   if (query.active === "true") {
     filter.active = true;
   } else if (query.active === "false") {
     filter.active = false;
   }
+  // ?name=texto → los que tienen ese texto en el nombre
+  // ($regex = "contiene", $options "i" = da igual mayúsculas o minúsculas)
   if (query.name) {
     filter.name = { $regex: query.name, $options: "i" };
   }
@@ -71,8 +73,10 @@ const getAllUsers = async (query) => {
     "createdAt",
     "-createdAt",
   ];
+  // Si no se envía sort, ordenamos por nombre (A-Z)
   let sort = "name";
   if (query.sort) {
+    // Si piden ordenar por otro campo → error 400
     if (!allowedSorts.includes(query.sort)) {
       const error = new Error(
         "Només es pot ordenar per: " + allowedSorts.join(", "),
@@ -84,15 +88,17 @@ const getAllUsers = async (query) => {
     sort = query.sort;
   }
 
-  // 3. PAGINACIÓN
+  // 3. PAGINACIÓN: si no se envía nada, página 1 y 10 resultados
   let page = 1;
   let limit = 10;
+  // Number() convierte el texto de la URL en número ("2" → 2)
   if (query.page !== undefined) {
     page = Number(query.page);
   }
   if (query.limit !== undefined) {
     limit = Number(query.limit);
   }
+  // Tienen que ser números enteros positivos (1, 2, 3...)
   if (
     !Number.isInteger(page) ||
     page < 1 ||
@@ -104,23 +110,28 @@ const getAllUsers = async (query) => {
     error.code = "INVALID_QUERY";
     throw error;
   }
+  // Límite máximo: como mucho 50 resultados por página
   if (limit > 50) {
     limit = 50;
   }
 
+  // Contamos cuántos hay en total (con los filtros) para saber las páginas
   const total = await User.countDocuments(filter);
+  // skip = cuántos nos saltamos (los de las páginas anteriores).
   // passwordHash no sale porque en el modelo tiene select: false
   const users = await User.find(filter)
     .sort(sort)
     .skip((page - 1) * limit)
     .limit(limit);
 
+  // Devolvemos los usuarios y los datos de la paginación
   return {
     data: users,
     pagination: {
       page: page,
       limit: limit,
       total: total,
+      // Math.ceil redondea hacia arriba (ej: 11 usuarios / 10 = 1,1 → 2 páginas)
       totalPages: Math.ceil(total / limit),
     },
   };

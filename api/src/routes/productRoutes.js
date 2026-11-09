@@ -1,3 +1,6 @@
+// RUTAS DE PRODUCTOS: dicen qué función del controlador se ejecuta
+// con cada método (GET, POST, PUT, DELETE) y cada URL
+
 // Importamos Express
 const express = require("express");
 // Creamos un router: un "mini servidor" solo para las rutas de productos

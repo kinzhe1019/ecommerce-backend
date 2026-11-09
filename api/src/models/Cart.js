@@ -1,13 +1,14 @@
 // Importamos Mongoose
 const mongoose = require("mongoose");
 
-// Esquema (el "molde") del carrito
+// Esquema (el "molde") del carrito.
+// De momento no tiene rutas ni controlador: se usará en próximas sesiones
 const cartSchema = new mongoose.Schema({
   // USER 1..1 CART: unique = cada usuario tiene un solo carrito
   user: {
     // Guardamos el _id del usuario dueño del carrito
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "User", // ese _id es de un documento del modelo User
     required: true,
     unique: true,
   },
@@ -31,5 +32,6 @@ const cartSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-// Creamos el modelo "Cart" a partir del esquema y lo exportamos
+// Creamos el modelo "Cart" a partir del esquema y lo exportamos.
+// En MongoDB se guarda en la colección "carts"
 module.exports = mongoose.model("Cart", cartSchema);

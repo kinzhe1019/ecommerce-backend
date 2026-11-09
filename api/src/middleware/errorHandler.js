@@ -1,8 +1,10 @@
 // Middleware GLOBAL de errores.
 // Express sabe que es de errores porque tiene 4 parámetros (err, req, res, next).
+// (next no lo usamos, pero tiene que estar para que sean 4)
 // Los controladores no responden los errores: hacen next(error) y llegan aquí.
 // Aquí decidimos el código HTTP y respondemos siempre con el mismo formato:
 // { success: false, error: { code, message, details } }
+// Cada caso acaba con return: así respondemos una sola vez y no seguimos mirando
 const errorHandler = (err, req, res, next) => {
   // 1. Validaciones de Mongoose (required, minlength, match, enum...) → 422
   if (err.name === "ValidationError") {

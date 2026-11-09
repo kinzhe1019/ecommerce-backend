@@ -1,3 +1,6 @@
+// CONEXIÓN CON MONGODB. MongoDB funciona dentro de Docker (contenedor ecommerce-mongo)
+// y la dirección, con el usuario y la contraseña, está en MONGO_URI del .env
+
 // Importamos Mongoose, la librería para trabajar con MongoDB
 const mongoose = require("mongoose");
 

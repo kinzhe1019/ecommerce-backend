@@ -1,5 +1,7 @@
 // El controlador se encarga de la parte HTTP: recibe la petición (req),
-// llama al servicio y responde (res). Los errores van con next(error) al errorHandler
+// llama al servicio y responde (res). Los errores van con next(error) al errorHandler.
+// async/await: esperamos (await) a que el servicio termine con la base de datos.
+// try/catch: si algo falla dentro del try, salta al catch
 
 // Importamos el servicio de usuarios
 const userService = require("../services/userService");
@@ -7,10 +9,12 @@ const userService = require("../services/userService");
 // POST /api/users → crear un usuario
 const createUser = async (req, res, next) => {
   try {
+    // El servicio comprueba la contraseña, hace el hash y no devuelve el hash
     const user = await userService.createUser(req.body);
     // 201 = Created
     res.status(201).json({ success: true, data: user });
   } catch (error) {
+    // Si algo falla (ej: email repetido), el error va al errorHandler
     next(error);
   }
 };
@@ -18,6 +22,7 @@ const createUser = async (req, res, next) => {
 // GET /api/users → listar (con filtros, ordenación y paginación)
 const getAllUsers = async (req, res, next) => {
   try {
+    // req.query = los parámetros de la URL (?active=true&page=2...)
     const result = await userService.getAllUsers(req.query);
     res.status(200).json({
       success: true,
@@ -33,6 +38,7 @@ const getAllUsers = async (req, res, next) => {
 const getUserById = async (req, res, next) => {
   try {
     const user = await userService.getUserById(req.params.id);
+    // null = no existe ese usuario → error 404
     if (!user) {
       const error = new Error("Usuari no trobat");
       error.status = 404;
@@ -49,6 +55,7 @@ const getUserById = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const user = await userService.updateUser(req.params.id, req.body);
+    // null = no existe ese usuario → error 404
     if (!user) {
       const error = new Error("Usuari no trobat");
       error.status = 404;
@@ -65,6 +72,7 @@ const updateUser = async (req, res, next) => {
 const deactivateUser = async (req, res, next) => {
   try {
     const user = await userService.deactivateUser(req.params.id);
+    // null = no existe ese usuario → error 404
     if (!user) {
       const error = new Error("Usuari no trobat");
       error.status = 404;
@@ -92,6 +100,7 @@ const register = async (req, res, next) => {
 // POST /api/users/login → iniciar sesión (devuelve un token)
 const login = async (req, res, next) => {
   try {
+    // Le pasamos al servicio el email y la contraseña que llegan en el body
     const result = await userService.loginUser(
       req.body.email,
       req.body.password,

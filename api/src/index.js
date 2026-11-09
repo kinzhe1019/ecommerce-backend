@@ -1,4 +1,8 @@
-// Carga las variables del archivo .env (MONGO_URI, PORT...) en process.env
+// ARCHIVO PRINCIPAL DE LA API: es el que se ejecuta con npm run dev.
+// Paso a paso: carga el .env, crea el servidor, conecta con MongoDB,
+// monta las rutas, pone el control de errores y se queda escuchando
+
+// Carga las variables del archivo .env (MONGO_URI, PORT, JWT_SECRET) en process.env
 require("dotenv").config();
 // Importamos Express, la librería para crear el servidor
 const express = require("express");
@@ -21,7 +25,8 @@ connectDB();
 // Ruta de prueba: si entras en http://localhost:3000/ responde este texto
 app.get("/", (req, res) => res.send("API Ecommerce en marxa!"));
 
-// Montamos las rutas de cada recurso con su prefijo
+// Montamos las rutas de cada recurso con su prefijo.
+// Ej: todo lo que empieza por /api/products lo lleva productRoutes
 app.use("/api/products", productRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/users", userRoutes);

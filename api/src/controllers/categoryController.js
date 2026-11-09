@@ -1,6 +1,8 @@
 // El controlador se encarga de la parte HTTP: recibe la petición (req),
 // llama al servicio y responde (res) con un código de estado y un JSON.
-// Si hay un error, NO responde aquí: lo pasa con next(error) al errorHandler
+// Si hay un error, NO responde aquí: lo pasa con next(error) al errorHandler.
+// async/await: esperamos (await) a que el servicio termine con la base de datos.
+// try/catch: si algo falla dentro del try, salta al catch
 
 // Importamos el servicio, que es el que trabaja con la base de datos
 const categoryService = require("../services/categoryService");
@@ -8,10 +10,12 @@ const categoryService = require("../services/categoryService");
 // POST /api/categories → crear una categoría
 const createCategory = async (req, res, next) => {
   try {
+    // req.body son los datos en JSON que envía Postman
     const category = await categoryService.createCategory(req.body);
     // 201 = Created
     res.status(201).json({ success: true, data: category });
   } catch (error) {
+    // Si algo falla (ej: slug repetido), el error va al errorHandler
     next(error);
   }
 };
@@ -21,6 +25,7 @@ const getAllCategories = async (req, res, next) => {
   try {
     // req.query = los parámetros de la URL (?active=true&page=2...)
     const result = await categoryService.getAllCategories(req.query);
+    // Además de data, devolvemos pagination (página, límite, total y páginas)
     res.status(200).json({
       success: true,
       data: result.data,
@@ -55,6 +60,7 @@ const updateCategory = async (req, res, next) => {
       req.params.id,
       req.body,
     );
+    // null = no existe esa categoría → error 404
     if (!category) {
       const error = new Error("Categoria no trobada");
       error.status = 404;
@@ -71,6 +77,7 @@ const updateCategory = async (req, res, next) => {
 const deleteCategory = async (req, res, next) => {
   try {
     const category = await categoryService.deleteCategory(req.params.id);
+    // null = no existe esa categoría → error 404
     if (!category) {
       const error = new Error("Categoria no trobada");
       error.status = 404;

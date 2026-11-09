@@ -1,12 +1,13 @@
 // Importamos Mongoose
 const mongoose = require("mongoose");
 
-// Esquema (el "molde") del pedido
+// Esquema (el "molde") del pedido.
+// De momento no tiene rutas ni controlador: se usará en próximas sesiones
 const orderSchema = new mongoose.Schema({
   // CART 1..N ORDER: guardamos el _id del carrito del que sale el pedido
   cart: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Cart",
+    ref: "Cart", // ese _id es de un documento del modelo Cart
     required: true,
   },
   // ORDER N..N PRODUCT: lista de productos con su cantidad y el precio pagado
@@ -38,5 +39,6 @@ const orderSchema = new mongoose.Schema({
   shippingAddress: { type: String, required: true },
 });
 
-// Creamos el modelo "Order" a partir del esquema y lo exportamos
+// Creamos el modelo "Order" a partir del esquema y lo exportamos.
+// En MongoDB se guarda en la colección "orders"
 module.exports = mongoose.model("Order", orderSchema);

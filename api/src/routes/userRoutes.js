@@ -1,3 +1,6 @@
+// RUTAS DE USUARIOS: dicen qué función del controlador se ejecuta
+// con cada método (GET, POST, PUT, DELETE) y cada URL
+
 // Importamos Express
 const express = require("express");
 // Creamos un router solo para las rutas de usuarios

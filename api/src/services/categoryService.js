@@ -32,8 +32,10 @@ const getAllCategories = async (query) => {
   // 2. ORDENACIÓN: solo dejamos ordenar por estos campos
   // (con "-" delante = de mayor a menor)
   const allowedSorts = ["name", "-name", "createdAt", "-createdAt"];
+  // Si no se envía sort, ordenamos por nombre (A-Z)
   let sort = "name";
   if (query.sort) {
+    // Si piden ordenar por otro campo → error 400
     if (!allowedSorts.includes(query.sort)) {
       const error = new Error(
         "Només es pot ordenar per: " + allowedSorts.join(", "),
@@ -48,6 +50,7 @@ const getAllCategories = async (query) => {
   // 3. PAGINACIÓN: si no se envía nada, página 1 y 10 resultados
   let page = 1;
   let limit = 10;
+  // Number() convierte el texto de la URL en número ("2" → 2)
   if (query.page !== undefined) {
     page = Number(query.page);
   }
@@ -79,12 +82,14 @@ const getAllCategories = async (query) => {
     .skip((page - 1) * limit)
     .limit(limit);
 
+  // Devolvemos las categorías y los datos de la paginación
   return {
     data: categories,
     pagination: {
       page: page,
       limit: limit,
       total: total,
+      // Math.ceil redondea hacia arriba (ej: 11 categorías / 10 = 1,1 → 2 páginas)
       totalPages: Math.ceil(total / limit),
     },
   };
