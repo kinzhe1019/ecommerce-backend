@@ -7,15 +7,24 @@ const express = require("express");
 const router = express.Router();
 // Importamos el controlador
 const userController = require("../controllers/userController");
+// Importamos el middleware que comprueba el access token
+const protect = require("../middleware/authMiddleware");
 
 // Todas estas rutas empiezan por /api/users (se monta en index.js)
-// ATENCIÓN: register y login ya funcionan con JWT, pero el CRUD todavía no
-// está protegido con el token (eso vendrá más adelante): solo en local
+// ATENCIÓN: /me ya está protegida con el access token, pero el CRUD
+// todavía no (eso vendrá más adelante): solo en local
 
-// POST /api/users/register → registro (cualquiera puede registrarse)
+// POST /api/users/register → registro (devuelve los 2 tokens)
 router.post("/register", userController.register);
-// POST /api/users/login → login (devuelve el token JWT)
+// POST /api/users/login → login (devuelve los 2 tokens)
 router.post("/login", userController.login);
+// POST /api/users/refresh → renueva los tokens (rotación del refresh token)
+router.post("/refresh", userController.refresh);
+// POST /api/users/logout → cierra la sesión (revoca el refresh token)
+router.post("/logout", userController.logout);
+// GET /api/users/me → RUTA PROTEGIDA: primero pasa por protect y luego por getMe.
+// Va antes de "/:id": si no, Express pensaría que "me" es un id
+router.get("/me", protect, userController.getMe);
 
 // GET /api/users → lista los usuarios
 router.get("/", userController.getAllUsers);

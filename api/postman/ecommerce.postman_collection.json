@@ -767,7 +767,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 201) {\r\n  pm.environment.set(\"token\", pm.response.json().data.token);\r\n}"
+                  "// Si el registro va bien, guardamos los 2 tokens en el entorno\r\nif (pm.response.code === 201) {\r\n  pm.environment.set(\"accessToken\", pm.response.json().data.accessToken);\r\n  pm.environment.set(\"refreshToken\", pm.response.json().data.refreshToken);\r\n}"
                 ]
               }
             }
@@ -806,7 +806,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "if (pm.response.code === 200) {\r\n  pm.environment.set(\"token\", pm.response.json().data.token);\r\n}"
+                  "// Si el login va bien, guardamos los 2 tokens en el entorno\r\nif (pm.response.code === 200) {\r\n  pm.environment.set(\"accessToken\", pm.response.json().data.accessToken);\r\n  pm.environment.set(\"refreshToken\", pm.response.json().data.refreshToken);\r\n}"
                 ]
               }
             }
@@ -832,6 +832,152 @@
                 "api",
                 "users",
                 "login"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfil",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{accessToken}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Perfil sense token",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "// Si va bien: guardamos el refresh token viejo (para probar la reutilización)\r\n// y después los 2 tokens nuevos\r\nif (pm.response.code === 200) {\r\n  pm.environment.set(\"oldRefreshToken\", pm.environment.get(\"refreshToken\"));\r\n  pm.environment.set(\"accessToken\", pm.response.json().data.accessToken);\r\n  pm.environment.set(\"refreshToken\", pm.response.json().data.refreshToken);\r\n}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh reutilitzat",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{oldRefreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "refresh"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "logout"
               ]
             }
           },

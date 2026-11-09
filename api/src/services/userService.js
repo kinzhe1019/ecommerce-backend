@@ -3,10 +3,10 @@
 
 // bcrypt convierte la contraseña en un hash (un texto que no se puede "deshacer")
 const bcrypt = require("bcrypt");
-// jsonwebtoken crea los tokens JWT (el "pase" que recibe el usuario al hacer login)
-const jwt = require("jsonwebtoken");
 // Importamos el modelo User
 const User = require("../models/User");
+// Importamos el servicio de tokens (crea el access token y el refresh token)
+const tokenService = require("./tokenService");
 
 // Campos que se pueden modificar con PUT. Cualquier otro (role, passwordHash,
 // active...) está prohibido
@@ -183,28 +183,22 @@ const deactivateUser = async (id) => {
   );
 };
 
-// Crea un token JWT para un usuario.
-// Dentro guardamos su id y su rol, y lo firmamos con la clave secreta del .env
-const generateToken = (user) => {
-  return jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET,
-    { expiresIn: "1h" }, // el token caduca en 1 hora
-  );
-};
-
-// REGISTRO: crea el usuario y le da un token
+// REGISTRO: crea el usuario y le da sus 2 tokens
 const registerUser = async (userData) => {
   // 1. Usamos createUser, que ya comprueba la contraseña,
   // hace el hash con bcrypt y pone role "client"
   const user = await createUser(userData);
-  // 2. Creamos el token del usuario nuevo
-  const token = generateToken(user);
-  // 3. Devolvemos los dos
-  return { user: user, token: token };
+  // 2. Creamos el access token y el refresh token (este se guarda en MongoDB)
+  const tokens = await tokenService.generateTokens(user);
+  // 3. Devolvemos el usuario y los 2 tokens
+  return {
+    user: user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
 };
 
-// LOGIN: comprueba el email y la contraseña y, si están bien, da un token
+// LOGIN: comprueba el email y la contraseña y, si están bien, da los 2 tokens
 const loginUser = async (email, password) => {
   // 1. Tienen que llegar el email y la contraseña, y ser texto
   if (typeof email !== "string" || typeof password !== "string") {
@@ -232,10 +226,14 @@ const loginUser = async (email, password) => {
     error.code = "INVALID_CREDENTIALS";
     throw error;
   }
-  // 5. Todo bien: creamos el token y quitamos el hash antes de devolver el usuario
-  const token = generateToken(user);
+  // 5. Todo bien: creamos los 2 tokens y quitamos el hash antes de devolver el usuario
+  const tokens = await tokenService.generateTokens(user);
   user.passwordHash = undefined;
-  return { user: user, token: token };
+  return {
+    user: user,
+    accessToken: tokens.accessToken,
+    refreshToken: tokens.refreshToken,
+  };
 };
 
 // Exportamos las funciones para usarlas en el controlador
